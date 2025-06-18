@@ -58,17 +58,17 @@ export default function Index() {
             <Link to="/dashboard">
               <Button size="lg" className="bg-green-500 hover:bg-green-600">
                 Go to Dashboard
-              </Button>
+          </Button>
             </Link>
           ) : (
             <Link to="/auth/github">
               <Button size="lg" className="bg-green-500 hover:bg-green-600">
                 Get Started with GitHub
-              </Button>
+          </Button>
             </Link>
           )}
         </div>
-      </div>
+        </div>
     </div>
   );
 }
