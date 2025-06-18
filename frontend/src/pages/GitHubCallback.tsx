@@ -1,43 +1,43 @@
 import { useEffect } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
-import { toast } from 'sonner';
-import { handleGitHubCallback } from '../lib/github-auth';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../lib/auth';
 
-const GitHubCallback = () => {
-  const [searchParams] = useSearchParams();
+export default function GitHubCallback() {
   const navigate = useNavigate();
+  const { setUser, setToken } = useAuth();
 
   useEffect(() => {
-    const code = searchParams.get('code');
+    const code = new URLSearchParams(window.location.search).get('code');
     
-    if (!code) {
-      toast.error('No authorization code received from GitHub');
+    if (code) {
+      fetch(`${import.meta.env.VITE_API_URL}/auth/github`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ code }),
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.token) {
+            setToken(data.token);
+            setUser(data.user);
+            navigate('/dashboard');
+          } else {
+            navigate('/');
+          }
+        })
+        .catch(() => {
+          navigate('/');
+        });
+    } else {
       navigate('/');
-      return;
     }
-
-    const authenticate = async () => {
-      try {
-        await handleGitHubCallback(code);
-        toast.success('Successfully authenticated with GitHub!');
-        navigate('/dashboard');
-      } catch (error) {
-        console.error('Authentication error:', error);
-        navigate('/');
-      }
-    };
-
-    authenticate();
-  }, [searchParams, navigate]);
+  }, [navigate, setUser, setToken]);
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white flex items-center justify-center">
-      <div className="text-center">
-        <h2 className="text-2xl font-bold text-green-400 mb-4">Authenticating with GitHub...</h2>
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-green-400 mx-auto"></div>
-      </div>
+    <div className="flex items-center justify-center min-h-screen">
+      <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-primary"></div>
     </div>
   );
-};
-
-export default GitHubCallback; 
+} 
