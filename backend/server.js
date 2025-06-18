@@ -14,7 +14,7 @@ dotenv.config();
 
 const app = express();
 app.use(cors({
-  origin: ['http://localhost:5174', 'http://localhost:5173','http://localhost:3000'],
+  origin: 'https://project52-beta.vercel.app',
   credentials: true, // Allow credentials (cookies, auth headers)
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'], // Allow these HTTP methods
   allowedHeaders: ['Content-Type', 'Authorization'], // Allow these headers
