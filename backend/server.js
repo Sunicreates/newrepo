@@ -359,24 +359,20 @@ app.put('/api/projects/:id', authenticateToken, async (req, res) => {
 
 app.delete('/api/projects/:id', authenticateToken, async (req, res) => {
   try {
-    let query = { _id: req.params.id };
-    if (req.user.role !== 'admin') {
-      query.userId = req.user._id;
-    }
-
-    const project = await Project.findOneAndUpdate(
-      query,
-      { isHidden: true },
-      { new: true }
-    );
-
+    
+    const project = await Project.findOneAndDelete({
+      _id: req.params.id,
+      userId: req.user._id
+    });
     if (!project) {
-      return res.status(404).json({ error: 'Project not found or unauthorized' });
+     
+      return res.status(404).json({ error: 'Project not found' });
     }
+
     res.json({ message: 'Project deleted successfully' });
   } catch (error) {
-    console.error('Error deleting project:', error);
-    res.status(500).json({ error: 'Failed to delete project' });
+  
+    res.status(500).json({ error: error.message });
   }
 });
 // Chat Routes
