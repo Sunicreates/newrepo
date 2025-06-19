@@ -359,17 +359,31 @@ app.put('/api/projects/:id', authenticateToken, async (req, res) => {
 
 app.delete('/api/projects/:id', authenticateToken, async (req, res) => {
   try {
-    
-    const project = await Project.findOneAndDelete({
-      _id: req.params.id,
-      userId: req.user._id
-    });
-    if (!project) {
-     
-      return res.status(404).json({ error: 'Project not found' });
-    }
+    const projectId = req.params.id;
+    const user = req.user;
 
-    res.json({ message: 'Project deleted successfully' });
+    if (user.role === 'admin') {
+      // Admin: hide the project
+      const project = await Project.findByIdAndUpdate(
+        projectId,
+        { isHidden: true },
+        { new: true }
+      );
+      if (!project) {
+        return res.status(404).json({ error: 'Project not found' });
+      }
+      return res.json({ message: 'Project hidden from admin view' });
+    } else {
+      // User: delete their own project
+      const project = await Project.findOneAndDelete({
+        _id: projectId,
+        userId: user._id
+      });
+      if (!project) {
+        return res.status(404).json({ error: 'Project not found' });
+      }
+      return res.json({ message: 'Project deleted successfully' });
+    }
   } catch (error) {
   
     res.status(500).json({ error: error.message });
